@@ -1,0 +1,46 @@
+---
+- name: Set cluster init configuration
+  template:
+    src: templates/k8s_kubeadm-config.yaml.j2
+    dest: "{{ kubeadm_init_config_path }}"
+    mode: '0600'
+  register: cluster_init
+
+- name: Init Cluster
+  ansible.builtin.shell:
+    cmd: kubeadm init --config {{ kubeadm_init_config_path }}
+  when: cluster_init.changed
+  timeout: 360
+
+- name: Kubectl config dir (root)
+  ansible.builtin.file:
+    path: /root/.kube
+    mode: '0700'
+    state: directory
+  when: cluster_init.changed
+
+- name: Copy admin configuration to root
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/kubernetes/admin.conf
+    dest: /root/.kube/config
+    mode: '0600'
+  when: cluster_init.changed
+
+- name: Fetch weave net CNI configuration
+  ansible.builtin.get_url:
+    url: "{{ weavenet_dl_url }}"
+    dest: /var/tmp/weavenet.yml
+    mode: '0600'
+  when: cluster_init.changed
+
+- name: Install weave net CNI
+  ansible.builtin.shell:
+    cmd: kubectl apply -f /var/tmp/weavenet.yml
+  when: cluster_init.changed
+
+- name: Enable kubelet service
+  ansible.builtin.service:
+    name: kubelet
+    enabled: true
+

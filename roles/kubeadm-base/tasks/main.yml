@@ -1,0 +1,95 @@
+---
+- name: Kubernetes packages version pinning
+  copy:
+    dest: /etc/apt/preferences.d/k8s
+    mode: '0644'
+    content: |
+      Package: kubelet
+      Pin: version {{ kubernetes_major_version }}.*
+      Pin-Priority: 999
+
+      Package: kubeadm
+      Pin: version {{ kubernetes_major_version }}.*
+      Pin-Priority: 999
+
+      Package: kubectl
+      Pin: version {{ kubernetes_major_version }}.*
+      Pin-Priority: 999
+
+      # kubernetes-cni v1.2.0 seems to be missing the flannel binary
+      Package: kubernetes-cni
+      Pin: version {{ kubernetes_cni_major_version }}.*
+      Pin-Priority: 999
+
+      Package: cri-tools
+      Pin: version {{ kubernetes_major_version }}.*
+      Pin-Priority: 999
+
+- name: Install packages required to install and manage kubernetes
+  ansible.builtin.apt:
+    state: present
+    pkg:
+    - ipvsadm
+    - kubeadm
+    - kubectl
+    - kubelet
+    - cri-tools
+    - kubernetes-cni
+  register: k8s_pkgs
+
+- name: Disable kubelet
+  ansible.builtin.service:
+    name: kubelet
+    enabled: false
+    state: stopped
+  when: k8s_pkgs.changed
+
+# System Prep
+- name: Set hostname (persistent)
+  copy:
+    dest: /etc/hostname
+    content: "{{ inventory_hostname }}"
+
+- name: Set hostname (runtime)
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Load bridge netfilter
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+    persistent: present
+
+- name: Enable IPv4 Forward
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Enable bridge netfiltering
+  ansible.posix.sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable IPv6 (all)
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.all.disable_ipv6
+    value: 1
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Disable IPv6 (default)
+  ansible.posix.sysctl:
+    name: net.ipv6.conf.default.disable_ipv6
+    value: 1
+    sysctl_set: true
+    state: present
+    reload: true
+
+

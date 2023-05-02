@@ -1,0 +1,30 @@
+---
+- name: Check if node is initialised
+  ansible.builtin.shell:
+    cmd: kubectl get nodes {{ inventory_hostname }}
+  delegate_to: master-1
+  ignore_errors: true
+  register: k8s_worker_init
+
+- name: Get cluster join token
+  ansible.builtin.shell:
+    cmd: kubeadm token create --print-join-command --ttl 90s
+  delegate_to: master-1
+  register: k8s_join_token
+  when: k8s_worker_init.failed
+
+- name: Join cluster
+  ansible.builtin.shell:
+    cmd: "{{ k8s_join_token['stdout'] }}"
+  when: k8s_worker_init.failed
+
+- name: Label worker node
+  ansible.builtin.shell:
+    cmd: kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/worker=worker
+  delegate_to: master-1
+
+- name: Enable kubelet service
+  ansible.builtin.service:
+    name: kubelet
+    enabled: true
+

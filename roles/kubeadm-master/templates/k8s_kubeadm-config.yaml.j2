@@ -1,0 +1,20 @@
+kind: ClusterConfiguration
+apiVersion: kubeadm.k8s.io/v1beta2
+controlPlaneEndpoint: {{ ansible_host }}
+imageRepository: {{ kubernetes_image_repository }}
+kubernetesVersion: v{{ kubernetes_major_version }}.{{ kubernetes_minor_version }}
+---
+kind: InitConfiguration
+apiVersion: kubeadm.k8s.io/v1beta2
+nodeRegistration:
+  criSocket: /run/containerd/containerd.sock
+  ignorePreflightErrors:
+  - mem
+  - numCpu
+localAPIEndpoint:
+  advertiseAddress: "{{ ansible_host }}"
+---
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+cgroupDriver: systemd
+
