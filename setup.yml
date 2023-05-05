@@ -1,0 +1,40 @@
+- hosts: all
+  vars:
+    ansible_user: root
+  tasks:
+  - name: Configure hosts file (/etc/hosts)
+    blockinfile:
+      create: no
+      path: /etc/hosts
+      block: |
+        {% for item in ansible_play_batch %}
+        {{ hostvars[item].ansible_host }}    {{ item }}
+        {% endfor %}
+
+
+- hosts: nfs_server
+  vars:
+    ansible_user: root
+
+- hosts: k8s_all
+  vars:
+    ansible_user: root
+  roles:
+  - containerd
+  - kubeadm-base
+
+- hosts: k8s_masters
+  vars:
+    ansible_user: root
+  roles:
+  - kubeadm-master
+
+- hosts: k8s_init_master
+  vars:
+    ansible_user: root
+
+- hosts: k8s_workers
+  vars:
+    ansible_user: root
+  roles:
+  - kubeadm-worker
