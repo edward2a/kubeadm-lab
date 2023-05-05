@@ -1,0 +1,3 @@
+kubeadm_init_config_path: /var/tmp/kubeadm-config.yml
+kubernetes_image_repository: registry.k8s.io
+kubernetes_cni: weavenet
