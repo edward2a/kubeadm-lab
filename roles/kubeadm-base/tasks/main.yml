@@ -1,49 +1,4 @@
 ---
-- name: Kubernetes packages version pinning
-  copy:
-    dest: /etc/apt/preferences.d/k8s
-    mode: '0644'
-    content: |
-      Package: kubelet
-      Pin: version {{ kubernetes_major_version }}.*
-      Pin-Priority: 999
-
-      Package: kubeadm
-      Pin: version {{ kubernetes_major_version }}.*
-      Pin-Priority: 999
-
-      Package: kubectl
-      Pin: version {{ kubernetes_major_version }}.*
-      Pin-Priority: 999
-
-      # kubernetes-cni v1.2.0 seems to be missing the flannel binary
-      Package: kubernetes-cni
-      Pin: version {{ kubernetes_cni_major_version }}.*
-      Pin-Priority: 999
-
-      Package: cri-tools
-      Pin: version {{ kubernetes_major_version }}.*
-      Pin-Priority: 999
-
-- name: Install packages required to install and manage kubernetes
-  ansible.builtin.apt:
-    state: present
-    pkg:
-    - ipvsadm
-    - kubeadm
-    - kubectl
-    - kubelet
-    - cri-tools
-    - kubernetes-cni
-  register: k8s_pkgs
-
-- name: Disable kubelet
-  ansible.builtin.service:
-    name: kubelet
-    enabled: false
-    state: stopped
-  when: k8s_pkgs.changed
-
 # System Prep
 - name: Set hostname (persistent)
   copy:
@@ -76,20 +31,81 @@
     state: present
     reload: true
 
-- name: Disable IPv6 (all)
-  ansible.posix.sysctl:
-    name: net.ipv6.conf.all.disable_ipv6
-    value: 1
-    sysctl_set: true
-    state: present
-    reload: true
+#- name: Disable IPv6 (all)
+#  ansible.posix.sysctl:
+#    name: net.ipv6.conf.all.disable_ipv6
+#    value: 1
+#    sysctl_set: true
+#    state: present
+#    reload: true
+#
+#- name: Disable IPv6 (default)
+#  ansible.posix.sysctl:
+#    name: net.ipv6.conf.default.disable_ipv6
+#    value: 1
+#    sysctl_set: true
+#    state: present
+#    reload: true
 
-- name: Disable IPv6 (default)
-  ansible.posix.sysctl:
-    name: net.ipv6.conf.default.disable_ipv6
-    value: 1
-    sysctl_set: true
+# K8S stuff
+- name: Packages required for secure apt transport
+  ansible.builtin.apt:
     state: present
-    reload: true
+    pkg:
+    - apt-transport-https
+    - ca-certificates
+    - gpg
 
+- name: Ensure k8s DEB repo key is installed
+  ansible.builtin.get_url:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    dest: /etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg
+    mode: '0644'
+
+- name: Ensure k8s DEB repo is installed
+  ansible.builtin.apt_repository:
+    repo: deb [signed-by=/etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+
+
+- name: Kubernetes packages version pinning
+  copy:
+    dest: /etc/apt/preferences.d/k8s
+    mode: '0644'
+    content: |
+      Package: kubelet
+      Pin: version {{ kubernetes_version }}*
+      Pin-Priority: 999
+
+      Package: kubeadm
+      Pin: version {{ kubernetes_version }}*
+      Pin-Priority: 999
+
+      Package: kubectl
+      Pin: version {{ kubernetes_version }}*
+      Pin-Priority: 999
+
+      # kubernetes-cni v1.2.0 seems to be missing the flannel binary
+      Package: kubernetes-cni
+      Pin: version {{ kubernetes_cni_base_version }}.*
+      Pin-Priority: 999
+
+- name: Install packages required to install and manage kubernetes
+  ansible.builtin.apt:
+    state: present
+    pkg:
+    - ipvsadm
+    - kubeadm
+    - kubectl
+    - kubelet
+    - cri-tools
+    - kubernetes-cni
+  register: k8s_pkgs
+
+- name: Disable kubelet
+  ansible.builtin.service:
+    name: kubelet
+    enabled: false
+    state: stopped
+  when: k8s_pkgs.changed
 
