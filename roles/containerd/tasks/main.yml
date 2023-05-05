@@ -1,0 +1,40 @@
+---
+- name: Packages required for secure apt transport
+  ansible.builtin.apt:
+    state: present
+    pkg:
+    - apt-transport-https
+    - ca-certificates
+    - gpg
+
+- name: Ensure docker DEB repo key is installed
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/{{ ansible_os_family | lower }}/gpg
+    dest: /etc/apt/trusted.gpg.d/docker.asc
+    mode: '0644'
+
+- name: Ensure docker DEB repo is installed
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
+    state: present
+
+- name: Install container runtime (containerd)
+  ansible.builtin.apt:
+    state: present
+    pkg:
+    - containerd.io
+
+- name: Install containerd configuration
+  copy:
+    src: files/containerd.toml
+    dest: /etc/containerd/config.toml
+    mode: '0644'
+  notify:
+  - Restart containerd
+
+- name: Install crictl configuration
+  copy:
+    src: files/crictl.yaml
+    dest: /etc/crictl.yaml
+    mode: '0644'
+
