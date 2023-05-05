@@ -1,13 +1,13 @@
 kind: ClusterConfiguration
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta3
 controlPlaneEndpoint: {{ ansible_host }}
 imageRepository: {{ kubernetes_image_repository }}
-kubernetesVersion: v{{ kubernetes_major_version }}.{{ kubernetes_minor_version }}
+kubernetesVersion: v{{ kubernetes_version }}
 ---
 kind: InitConfiguration
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: kubeadm.k8s.io/v1beta3
 nodeRegistration:
-  criSocket: /run/containerd/containerd.sock
+  criSocket: unix:///run/containerd/containerd.sock
   ignorePreflightErrors:
   - mem
   - numCpu
