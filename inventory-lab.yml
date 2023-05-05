@@ -1,0 +1,60 @@
+all:
+  vars:
+    kubernetes_cni_base_version: '1.2'
+    kubernetes_major_version: '1'
+    kubernetes_minor_version: '25'
+    kubernetes_patch_version: '8'
+    kubernetes_version: '{{ kubernetes_major_version }}.{{ kubernetes_minor_version }}.{{ kubernetes_patch_version }}'
+    weavenet_version: 2.8.1
+    weavenet_dl_url: https://github.com/weaveworks/weave/releases/download/v{{ weavenet_version }}/weave-daemonset-k8s.yaml
+
+  hosts:
+
+    nfs:
+      ansible_host: 192.168.56.200
+      node_type: nfs-server
+
+    master-1:
+      ansible_host: 192.168.56.210
+      node_type: k8s-master
+      kubeadm_init: true
+
+    worker-01:
+      ansible_host: 192.168.56.221
+      node_type: k8s-worker
+
+    worker-02:
+      ansible_host: 192.168.56.222
+      node_type: k8s-worker
+
+    worker-03:
+      ansible_host: 192.168.56.223
+      node_type: k8s-worker
+
+
+  children:
+
+    nfs_server:
+      hosts:
+        nfs:
+
+    k8s_all:
+      hosts:
+        master-1:
+        worker-01:
+        worker-02:
+        worker-03:
+
+    k8s_masters:
+      hosts:
+        master-1:
+
+    k8s_init_master:
+        master-1:
+
+    k8s_workers:
+      hosts:
+        worker-01:
+        worker-02:
+        worker-03:
+
