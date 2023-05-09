@@ -11,17 +11,18 @@
     cmd: kubeadm token create --print-join-command --ttl 90s
   delegate_to: master-1
   register: k8s_join_token
-  when: k8s_worker_init.failed
+  when: k8s_worker_init.rc == 1
 
 - name: Join cluster
   ansible.builtin.shell:
     cmd: "{{ k8s_join_token['stdout'] }}"
-  when: k8s_worker_init.failed
+  when: k8s_worker_init.rc == 1
 
 - name: Label worker node
   ansible.builtin.shell:
     cmd: kubectl label node {{ inventory_hostname }} node-role.kubernetes.io/worker=worker
   delegate_to: master-1
+  when: k8s_worker_init.rc == 1
 
 - name: Enable kubelet service
   ansible.builtin.service:
