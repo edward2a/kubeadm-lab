@@ -15,6 +15,10 @@
 - hosts: nfs_server
   vars:
     ansible_user: root
+    nfs_exports:
+    - /nfs-share    192.168.56.0/24(rw,nohide,insecure,no_subtree_check,sync,fsid=0,no_root_squash)
+  roles:
+  - nfs-server
 
 - hosts: k8s_all
   vars:
