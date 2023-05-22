@@ -1,0 +1,19 @@
+- name: Restart NFS
+  ansible.builtin.service:
+    name: nfs-server
+    state: restarted
+
+- name: Reload NFS
+  ansible.builtin.service:
+    name: nfs-server
+    state: reloaded
+
+- name: Restart portmap
+  ansible.builtin.service:
+    name: rpcbind
+    state: restarted
+
+- name: Reload portmap
+  ansible.builtin.service:
+    name: rpcbind
+    state: reloaded
