@@ -1,0 +1,4 @@
+nfs_allowed_sources:
+- '192.168.56.'
+nfs_exports:
+- '/example 192.168.56.0/24(rw,no_root_squash,subtree_check)'
