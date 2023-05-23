@@ -59,12 +59,12 @@
 - name: Ensure k8s DEB repo key is installed
   ansible.builtin.get_url:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-    dest: /etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg
+    dest: /etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg.asc
     mode: '0644'
 
 - name: Ensure k8s DEB repo is installed
   ansible.builtin.apt_repository:
-    repo: deb [signed-by=/etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main
+    repo: deb [signed-by=/etc/apt/trusted.gpg.d/kubernetes-archive-keyring.gpg.asc] https://apt.kubernetes.io/ kubernetes-xenial main
     state: present
 
 
