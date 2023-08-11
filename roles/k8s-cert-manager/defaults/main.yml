@@ -1,0 +1,4 @@
+cert_manager_version: "1.12.0"
+cert_manager_dl_url: "https://github.com/cert-manager/cert-manager/releases/download/v{{ cert_manager_version }}/cert-manager.yaml"
+create_self_signed_cluster_issuer: true
+self_signed_cluster_issuer_name: self-signed

@@ -1,0 +1,15 @@
+# TODO: add check if deployed and version
+
+- name: Fetch cert-manager
+  ansible.builtin.get_url:
+    url: "{{ cert_manager_dl_url }}"
+    dest: /var/tmp/cert-manager.yml
+    mode: '0600'
+  when: cert_manager_enabled
+
+- name: Install cert-manager
+  ansible.builtin.shell:
+    cmd: kubectl apply -f /var/tmp/cert-manager.yml
+  when: cert_manager_enabled
+
+
