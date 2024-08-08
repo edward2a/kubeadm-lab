@@ -101,6 +101,12 @@
     - cri-tools
     - kubernetes-cni
   register: k8s_pkgs
+  
+- name: Create shortcut link to kubectl
+  ansible.builtin.file:
+    src: /usr/bin/kubectl
+    path: /usr/bin/k
+    state: link
 
 - name: Disable kubelet
   ansible.builtin.service:
