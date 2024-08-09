@@ -1,0 +1,7 @@
+master_nodes: 1
+worker_nodes: 2
+host_network_name: vboxnet0
+host_network_prefix: "192.168.56"
+host_network_master_range: 220
+host_network_worker_range: 230
+
