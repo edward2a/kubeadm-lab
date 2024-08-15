@@ -17,7 +17,38 @@ if cfg['worker_nodes'] > 9
   exit(1)
 end
 
-private_network_range = "192.168.56.0/24"
+# Create ansible inventory
+ans_inventory = {
+  "all" => {
+    "vars" => {
+      "kubernetes_cni_base_version" => "1.2",
+      "kubernetes_major_version" => "1",
+      "kubernetes_minor_version" => "26",
+      "kubernetes_patch_version" => "12",
+      "kubernetes_version" => '{{ kubernetes_major_version }}.{{ kubernetes_minor_version }}.{{ kubernetes_patch_version }}',
+      "weavenet_version" => "2.8.1",
+      "weavenet_dl_url" => "https://github.com/weaveworks/weave/releases/download/v{{ weavenet_version }}/weave-daemonset-k8s.yaml"
+    },
+    "hosts" => {},
+    "children" => {
+      "nfs_server" => {
+        "hosts" => {},
+      },
+      "k8s_all" => {
+        "hosts" => {},
+      },
+      "k8s_masters" => {
+        "hosts" => {},
+      },
+      "k8s_init_master" => {
+        "hosts" => {},
+      },
+      "k8s_workers" => {
+        "hosts" => {}
+      },
+    },
+  }
+}
 
 Vagrant.configure("2") do |config|
 
@@ -28,6 +59,9 @@ Vagrant.configure("2") do |config|
   # Set VM image
   config.vm.box = "debian/bookworm64"
   config.vm.box_check_update = false
+
+  # Create NFS server
+  # TODO
 
   # Create masters
   (1..cfg['master_nodes']).each do |node_id|
@@ -51,4 +85,6 @@ Vagrant.configure("2") do |config|
     end
   end
 
+  # Write ansible inventory
+  File.write('inventory-vbox.yml', YAML.safe_dump(ans_inventory))
 end
