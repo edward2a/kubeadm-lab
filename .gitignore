@@ -1,1 +1,5 @@
+# vim swaps
 *.swp
+
+# vagrant
+.vagrant
