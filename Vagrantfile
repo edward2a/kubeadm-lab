@@ -44,7 +44,7 @@ ans_inventory = {
         "hosts" => {},
       },
       "k8s_workers" => {
-        "hosts" => {}
+        "hosts" => {},
       },
     },
   }
@@ -70,8 +70,21 @@ Vagrant.configure("2") do |config|
       node.vm.network "private_network",
         :name => cfg['host_network_name'],
         :adapter => 2,
-        :ip => "192.168.56.#{cfg['host_network_master_range'] + node_id}"
+        :ip => "#{cfg['host_network_prefix']}.#{cfg['host_network_master_range'] + node_id}"
     end
+
+    # Add node to inventory
+    ans_inventory['all']['hosts']["master-#{node_id}"] = {
+      "ansible_host" => "#{cfg['host_network_prefix']}.#{cfg['host_network_master_range'] + node_id}",
+      "node_type" => "k8s-master",
+    }
+
+    ans_inventory['all']['children']['k8s_masters']['hosts']["master-#{node_id}"] = {}
+
+    if node_id == 1
+      ans_inventory['all']['children']['k8s_init_master']['hosts']["master-#{node_id}"] = {}
+    end
+
   end
 
   # Create workers
@@ -81,10 +94,20 @@ Vagrant.configure("2") do |config|
       node.vm.network "private_network",
         :name => cfg['host_network_name'],
         :adapter => 2,
-        :ip => "192.168.56.#{cfg['host_network_worker_range'] + node_id}"
+        :ip => "#{cfg['host_network_prefix']}.#{cfg['host_network_worker_range'] + node_id}"
     end
+
+    # Add node to inventory
+    ans_inventory['all']['hosts']["worker-#{node_id}"] = {
+      "ansible_host" => "#{cfg['host_network_prefix']}.#{cfg['host_network_worker_range'] + node_id}",
+      "node_type" => "k8s-worker",
+    }
+
+    ans_inventory['all']['children']['k8s_workers']['hosts']["worker-#{node_id}"] = {}
+
   end
 
   # Write ansible inventory
   File.write('inventory-vbox.yml', YAML.safe_dump(ans_inventory))
 end
+
