@@ -1,3 +1,4 @@
+ssh_pub_key_path: ./ssh_key.pub
 master_nodes: 1
 worker_nodes: 2
 host_network_name: vboxnet0
