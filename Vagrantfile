@@ -4,6 +4,7 @@
 require 'yaml'
 
 cfg = YAML.safe_load(File.read('lab-config.yml'))
+cfg['ssh_public_key'] = File.read(cfg['ssh_pub_key_path']).strip()
 
 # Check no more than 3 masters requested
 if cfg['master_nodes'] > 3
@@ -105,6 +106,14 @@ Vagrant.configure("2") do |config|
 
     ans_inventory['all']['children']['k8s_workers']['hosts']["worker-#{node_id}"] = {}
 
+  end
+
+  # Add SSH public key(s) to node
+  config.vm.provision "shell" do |s|
+    s.inline = <<-SHELL
+      echo "#{cfg['ssh_public_key']}" >> /home/vagrant/.ssh/authorized_keys
+      echo "#{cfg['ssh_public_key']}" >> /root/.ssh/authorized_keys
+    SHELL
   end
 
   # Write ansible inventory
