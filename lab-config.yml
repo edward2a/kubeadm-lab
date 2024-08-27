@@ -1,6 +1,12 @@
 ssh_pub_key_path: ./ssh_key.pub
 master_nodes: 1
 worker_nodes: 2
+master_config:
+  cpu: 2
+  memory: 2048
+worker_config:
+  cpu: 2
+  memory: 5144
 host_network_name: vboxnet0
 host_network_prefix: "192.168.56"
 host_network_master_range: 220

@@ -72,6 +72,12 @@ Vagrant.configure("2") do |config|
         :name => cfg['host_network_name'],
         :adapter => 2,
         :ip => "#{cfg['host_network_prefix']}.#{cfg['host_network_master_range'] + node_id}"
+
+      # Configure VM resources
+      node.vm.provider "virtualbox" do |vm|
+        vm.memory = cfg["master_config"]["memory"]
+        vm.cpus = cfg["master_config"]["cpu"]
+      end
     end
 
     # Add node to inventory
@@ -96,6 +102,12 @@ Vagrant.configure("2") do |config|
         :name => cfg['host_network_name'],
         :adapter => 2,
         :ip => "#{cfg['host_network_prefix']}.#{cfg['host_network_worker_range'] + node_id}"
+
+      # Configure VM resources
+      node.vm.provider "virtualbox" do |vm|
+        vm.memory = cfg["worker_config"]["memory"]
+        vm.cpus = cfg["worker_config"]["cpu"]
+      end
     end
 
     # Add node to inventory
