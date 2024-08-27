@@ -1,0 +1,40 @@
+- name: Check helm version
+  ansible.builtin.shell:
+    cmd: '{ helm version 2>/dev/null | grep -Po "v\K\d\.\d+"; } || echo "0"'
+  register: current_helm_version
+
+- when: helm_version != current_helm_version
+  block:
+
+  - name: Download Helm
+    ansible.builtin.get_url:
+      url: "https://get.helm.sh/helm-v{{helm_version}}-linux-amd64.tar.gz"
+      dest: "/tmp/helm-v{{helm_version}}-linux-amd64.tar.gz"
+
+  - name: Unpack helm
+    ansible.builtin.unarchive:
+      src: "/tmp/helm-v{{helm_version}}-linux-amd64.tar.gz"
+      dest: /tmp
+      remote_src: true
+
+  - name: Install helm
+    ansible.builtin.copy:
+      src: /tmp/linux-amd64/helm
+      dest: /usr/local/bin/helm
+      owner: root
+      group: root
+      mode: '0755'
+      remote_src: true
+
+  always:
+
+  - name: Remove downloaded file
+    ansible.builtin.file:
+      path: "/tmp/helm-v{{helm_version}}-linux-amd64.tar.gz"
+      state: absent
+
+  - name: Remove unpacked files
+    ansible.builtin.file:
+      path: /tmp/linux-amd64/
+      state: absent
+
