@@ -11,6 +11,10 @@
         {{ hostvars[item].ansible_host }}    {{ item }}
         {% endfor %}
 
+  - name: Update dpkg cache
+    ansible.builtin.apt:
+      cache_valid_time: "{{ 7 * 24 * 60 * 60 | int }}"
+
 
 - hosts: nfs_server
   vars:
