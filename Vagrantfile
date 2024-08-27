@@ -87,6 +87,7 @@ Vagrant.configure("2") do |config|
     }
 
     ans_inventory['all']['children']['k8s_masters']['hosts']["master-#{node_id}"] = {}
+    ans_inventory['all']['children']['k8s_all']['hosts']["master-#{node_id}"] = {}
 
     if node_id == 1
       ans_inventory['all']['children']['k8s_init_master']['hosts']["master-#{node_id}"] = {}
@@ -117,6 +118,7 @@ Vagrant.configure("2") do |config|
     }
 
     ans_inventory['all']['children']['k8s_workers']['hosts']["worker-#{node_id}"] = {}
+    ans_inventory['all']['children']['k8s_all']['hosts']["worker-#{node_id}"] = {}
 
   end
 
