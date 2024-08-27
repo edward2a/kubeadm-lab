@@ -36,6 +36,7 @@
     ansible_user: root
   roles:
   - kubeadm-master
+  - helm
 
 - hosts: k8s_init_master
   vars:
