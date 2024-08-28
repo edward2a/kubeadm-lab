@@ -3,7 +3,7 @@
     ansible_user: root
   tasks:
   - name: Configure hosts file (/etc/hosts)
-    blockinfile:
+    ansible.builtin.blockinfile:
       create: no
       path: /etc/hosts
       block: |
@@ -46,4 +46,5 @@
   vars:
     ansible_user: root
   roles:
+  - hostnet-static-routes
   - kubeadm-worker

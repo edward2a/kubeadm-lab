@@ -1,0 +1,2 @@
+k8s_vnet_range: 10.96.0.0/12
+k8s_net_dev: eth1

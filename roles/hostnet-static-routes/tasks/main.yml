@@ -1,0 +1,13 @@
+- name: Set static route
+  ansible.builtin.shell:
+    cmd: "ip route replace {{ k8s_vnet_range }} dev {{ k8s_net_dev }}"
+
+- name: Make static route persistent
+  ansible.builtin.blockinfile:
+    create: no
+    marker_begin: "# ANSIBLE MANAGED BLOCK - BEGIN"
+    marker_end: "# ANSIBLE MANAGED BLOCK - END"
+    path: /etc/network/interfaces
+    insertafter: "#VAGRANT-END"
+    block: "      up ip route replace {{ k8s_vnet_range }} dev {{ k8s_net_dev }}"
+
