@@ -98,7 +98,7 @@ Vagrant.configure("2") do |config|
   # Create workers
   (1..cfg['worker_nodes']).each do |node_id|
     config.vm.define "worker-#{node_id}" do |node|
-      node.vm.hostname = "master-#{node_id}"
+      node.vm.hostname = "worker-#{node_id}"
       node.vm.network "private_network",
         :name => cfg['host_network_name'],
         :adapter => 2,
